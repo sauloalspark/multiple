@@ -1,9 +1,9 @@
-//#define USE_ADJDS311
+#define USE_ADJDS311
 #define BLINK_LED
 #define USE_BMP085
-//#define USE_TCS34725
+#define USE_TCS34725
 #define USE_TINKER
-//#define USE_TMP006
+#define USE_TMP006
 
 
 
@@ -70,22 +70,22 @@ void setup() {
 
 void loop() {
     #ifdef USE_ADJDS311
-        runADJDS311();
+        run_ADJDS311();
     #endif
 
     #ifdef BLINK_LED
-        runBLINK_LED();
+        run_BLINK_LED();
     #endif
 
     #ifdef USE_BMP085
-        runBMP085();
+        run_BMP085();
     #endif
     
     #ifdef USE_TCS34725
-        runTCS34725();
+        run_TCS34725();
     #endif
     
     #ifdef USE_TMP006
-        runTMP006();
+        run_TMP006();
     #endif
 }
