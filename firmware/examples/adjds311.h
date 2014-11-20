@@ -12,22 +12,22 @@
 #define ADJDS311_VARIABLE
 
 
-char              ADJDS311info[256];
+char              info_ADJDS311[256];
 #ifdef ADJDS311_PUBLISH
-char              ADJDS311infoS[62];
+char              infoS_ADJDS311[62];
 #endif
 //unsigned long   BMP085interval = 30000;
-unsigned long     ADJDS311interval = 60000;
+unsigned long     interval_ADJDS311 = 60000;
 //unsigned long     BMP085altDiff  = 101500;
-unsigned long     ADJDS311lastTime;
+unsigned long     lastTime_ADJDS311;
 
-int ADJDS311_sensorLed_pin = 2; //LED on the ADJDS-311
-ADJDS311 adjds311(ADJDS311_sensorLed_pin);
+int sensorLed_pin_ADJDS311 = 2; //LED on the ADJDS-311
+ADJDS311 adjds311(sensorLed_pin_ADJDS311);
 
 //if using an RGB LED (Needs PWM Pins)
-int ADJDS311_redPin   = 3;
-int ADJDS311_greenPin = 5;
-int ADJDS311_bluePin  = 6;
+int redPin_ADJDS311   = 3;
+int greenPin_ADJDS311 = 5;
+int bluePin_ADJDS311  = 6;
 
 
 //
@@ -35,7 +35,7 @@ int ADJDS311_bluePin  = 6;
 //
 
 // Initialize ADJDS311
-void InitializeADJDS311(){
+void Initialize_ADJDS311(){
 	if (!adjds311.begin()) {
 	    RGB.control(true);
 	    RGB.color(0, 0, 255);
@@ -45,39 +45,33 @@ void InitializeADJDS311(){
 		
 		while (1) {}
 	}
-	
-	RGB.control(false);
 }
 
 
-int getADJDS311info(String command){
-    //    Spark.publish("neoUpdate", "updating", publishTTL, PRIVATE);
-
+int getinfo_ADJDS311(String command){
     adjds311.ledOn(); //turn LED on
     
     //Calibrate white 
     //Need to hold white card in front (1-3mm) of it to calibrate from
     adjds311.calibrate(); 
-    
-    
+
     RGBC color = adjds311.read(); //read the color
     
     adjds311.ledOff(); //turn LED on
  
-    int red   = color.red;
-    int green = color.green;
-    int blue  = color.blue;
-    int clear = color.clear;
+    int red   = map(color.red  , 0, 1024, 0, 255);
+    int green = map(color.green, 0, 1024, 0, 255);
+    int blue  = map(color.blue , 0, 1024, 0, 255);
+    int clear = map(color.clear, 0, 1024, 0, 255);
  
-    sprintf(ADJDS311info , "{\"red\": %d, \"green\": %d, \"blue\": %d, \"clear\": %d}", red, green, blue, clear);
+    sprintf(info_ADJDS311 , "{\"red\": %d, \"green\": %d, \"blue\": %d, \"clear\": %d}", red, green, blue, clear);
 
     #ifdef ADJDS311_PUBLISH
-        sprintf(ADJDS311infoS, "{\"r\": %d, \"g\": %d, \"b\": %d, \"c\": %d}", red, green, blue, clear);
+        sprintf(infoS_ADJDS311, "{\"r\": %d, \"g\": %d, \"b\": %d, \"c\": %d}", red, green, blue, clear);
     #endif
 
-        
     #ifdef ADJDS311_SERIAL
-        Serial.println(ADJDS311info);
+        Serial.println(info_ADJDS311);
     #endif
 
      
@@ -96,61 +90,58 @@ int getADJDS311info(String command){
 }
 
 #ifdef ADJDS311_PUBLISH
-void publishADJDS311info(){
-    if ( (millis()-ADJDS311lastTime) < ADJDS311interval ) {
+void publishinfo_ADJDS311(){
+    if ( (millis()-lastTime_ADJDS311) < interval_ADJDS311 ) {
         return;
     }
-    
-    //Spark.publish("neoUpdate"   , "publish update", publishTTL, PRIVATE);
-    
-    getADJDS311info("");
-    
-    //Spark.publish("neoUpdate"   , "publish updated", publishTTL, PRIVATE);
-    
-    Spark.publish("ADJDS311infoEv", ADJDS311infoS, publishTTL, PRIVATE);
-    //Spark.publish("BMP085infoEv", "pubishing actual results", publishTTL, PRIVATE);
-    
-    ADJDS311lastTime = millis();
+
+    getinfo_ADJDS311("");
+
+    Spark.publish("ADJDS311infoEv", infoS_ADJDS311, publishTTL, PRIVATE);
+
+    lastTime_ADJDS311 = millis();
 }
 #endif
 
-void updateADJDS311info(){
-    if ( (millis()-ADJDS311lastTime) < ADJDS311interval ) {
+void updateinfo_ADJDS311(){
+    if ( (millis()-lastTime_ADJDS311) < interval_ADJDS311 ) {
         return;
     }
     
     //Spark.publish("neoUpdate", "function", publishTTL, PRIVATE);
     
-    getADJDS311info("");
+    getinfo_ADJDS311("");
     
-    ADJDS311lastTime = millis();
+    lastTime_ADJDS311 = millis();
 }
 
 void InitializeApplication_ADJDS311() {
+    Initialize_ADJDS311();
+    
     #ifdef ADJDS311_SERIAL
         Serial.begin(9600);
     #endif
     
     #ifdef ADJDS311_VARIABLE
-        Spark.variable( "ADJDS311"   , &ADJDS311info   , STRING );
+        Spark.variable( "ADJDS311"   , &info_ADJDS311   , STRING );
     #endif
     
     #ifdef ADJDS311_FUNCTION
-        Spark.function( "getADJDS311",  getADJDS311info         );
+        Spark.function( "getADJDS311",  getinfo_ADJDS311         );
     #endif
     
-    getADJDS311info("");
+    getinfo_ADJDS311("");
     
-    ADJDS311lastTime = millis();
+    lastTime_ADJDS311 = millis();
 }
 
-void runADJDS311() {
+void run_ADJDS311() {
     #ifdef ADJDS311_PUBLISH
-        publishADJDS311info();
+        publishinfo_ADJDS311();
     #else
 
         #ifdef ADJDS311_VARIABLE
-            updateADJDS311info();
+            updateinfo_ADJDS311();
         #endif
 
     #endif
