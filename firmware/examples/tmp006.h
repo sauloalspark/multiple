@@ -10,19 +10,19 @@
 //#define TMP006_PUBLISH
 #define TMP006_VARIABLE
 
-char              TMP006info[256];
+char              info_TMP006[256];
 #ifdef TMP006_PUBLISH
-char              TMP006infoS[62];
+char              infoS_TMP006[62];
 #endif
 //unsigned long   BMP085interval = 30000;
-unsigned long     TMP006interval = 60000;
+unsigned long     interval_TMP006 = 60000;
 //unsigned long     BMP085altDiff  = 101500;
-unsigned long     TMP006lastTime;
+unsigned long     lastTime_TMP006;
 
-uint8_t  TMP006sensor1 = 0x40; // I2C address of TMP006, can be 0x40-0x47
-uint16_t TMP006samples = TMP006_CFG_16SAMPLE; // # of samples per reading, can be 1/2/4/8/16
+uint8_t  sensor1_TMP006 = 0x40; // I2C address of TMP006, can be 0x40-0x47
+uint16_t samples_TMP006 = TMP006_CFG_16SAMPLE; // # of samples per reading, can be 1/2/4/8/16
 
-TMP006 tmp006(TMP006sensor1);
+TMP006 tmp006(sensor1_TMP006);
 
 
 
@@ -31,8 +31,8 @@ TMP006 tmp006(TMP006sensor1);
 //
 
 // Initialize TMP006
-void InitializeTMP006(){
-	if (!tmp006.begin(TMP006samples)) {
+void Initialize_TMP006(){
+	if (!tmp006.begin(samples_TMP006)) {
 	    RGB.control(true);
 	    RGB.color(0, 255, 0);
         #ifdef TMP006_SERIAL
@@ -41,21 +41,17 @@ void InitializeTMP006(){
 		
 		while (1) {}
 	}
-	
-	RGB.control(false);
 }
 
-int getTMP006info(String command){
-    //    Spark.publish("neoUpdate", "updating", publishTTL, PRIVATE);
-
+int getinfo_TMP006(String command){
     double object_temp = tmp006.readObjTempC();
     double sensor_temp = tmp006.readDieTempC();
 
     
-    sprintf(TMP006info , "{\"Object Temperature\": %.5f, \"Sensor Temperature\": %.5f}", object_temp, sensor_temp);
+    sprintf(info_TMP006 , "{\"Object Temperature\": %.5f, \"Sensor Temperature\": %.5f}", object_temp, sensor_temp);
 
     #ifdef TMP006_PUBLISH
-        sprintf(TMP006infoS, "{\"temp_o\": %.5f, \"temp_s\": %.5f}", object_temp, sensor_temp);
+        sprintf(infoS_TMP006, "{\"temp_o\": %.5f, \"temp_s\": %.5f}", object_temp, sensor_temp);
     #endif
 
     #ifdef TMP006_SERIAL
@@ -72,61 +68,56 @@ int getTMP006info(String command){
 }
 
 #ifdef TMP006_PUBLISH
-void publishTMP006info(){
-    if ( (millis()-TMP006lastTime) < TMP006interval ) {
+void publishinfo_TMP006(){
+    if ( (millis()-lastTime_TMP006) < interval_TMP006 ) {
         return;
     }
     
-    //Spark.publish("neoUpdate"   , "publish update", publishTTL, PRIVATE);
-    
-    getTMP006info("");
-    
-    //Spark.publish("neoUpdate"   , "publish updated", publishTTL, PRIVATE);
-    
-    Spark.publish("TMP006infoEv", TMP006infoS, publishTTL, PRIVATE);
-    //Spark.publish("BMP085infoEv", "pubishing actual results", publishTTL, PRIVATE);
-    
-    TMP006lastTime = millis();
+    getinfo_TMP006("");
+
+    Spark.publish("TMP006infoEv", infoS_TMP006, publishTTL, PRIVATE);
+
+    lastTime_TMP006 = millis();
 }
 #endif
 
-void updateTMP006info(){
-    if ( (millis()-TMP006lastTime) < TMP006interval ) {
+void updateinfo_TMP006(){
+    if ( (millis()-lastTime_TMP006) < interval_TMP006 ) {
         return;
     }
+
+    getinfo_TMP006("");
     
-    //Spark.publish("neoUpdate", "function", publishTTL, PRIVATE);
-    
-    getTMP006info("");
-    
-    TMP006lastTime = millis();
+    lastTime_TMP006 = millis();
 }
 
 void InitializeApplication_TMP006() {
+    Initialize_TMP006();
+    
     #ifdef TMP006_SERIAL
         Serial.begin(9600);
     #endif
     
     #ifdef TMP006_VARIABLE
-        Spark.variable( "TMP006"   , &TMP006info   , STRING );
+        Spark.variable( "TMP006"   , &info_TMP006   , STRING );
     #endif
     
     #ifdef TMP006_FUNCTION
-        Spark.function( "getTMP006",  getTMP006info         );
+        Spark.function( "getTMP006",  getinfo_TMP006         );
     #endif
 
-    getTMP006info("");
+    getinfo_TMP006("");
 
-    TMP006lastTime = millis();
+    lastTime_TMP006 = millis();
 }
 
-void runTMP006() {
+void run_TMP006() {
     #ifdef TMP006_PUBLISH
-        publishTMP006info();
+        publishinfo_TMP006();
     #else
 
         #ifdef TMP006_VARIABLE
-            updateTMP006info();
+            updateinfo_TMP006();
         #endif
 
     #endif
