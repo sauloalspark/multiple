@@ -1,10 +1,10 @@
 //
 // VARIABLES FOR BLINK LED
 //
-unsigned long BLINK_LEDinterval    = 500;
-int           BLINK_LEDstate       = LOW;
-const int     BLINK_LEDPin         = D7;
-unsigned long BLINK_LEDlastTime;
+unsigned long interval_LED_BLINK    = 500;
+int           state_LED_BLINK       = LOW;
+const int     pin_LED_BLINK         = D7;
+unsigned long lastTime_LED_BLINK;
 
 
 
@@ -14,24 +14,24 @@ unsigned long BLINK_LEDlastTime;
 
 // Blink LED and wait for some time
 void InitializeApplication_BLINK_LED() {
-    pinMode(BLINK_LEDPin, OUTPUT);
+    pinMode(pin_LED_BLINK, OUTPUT);
 }
 
-void runBLINK_LED() {
+void run_BLINK_LED() {
     unsigned long currentMillis = millis();
  
-    if((currentMillis - BLINK_LEDlastTime) > BLINK_LEDinterval) {
+    if((currentMillis - lastTime_LED_BLINK) > interval_LED_BLINK) {
         // save the last time you blinked the LED 
-        BLINK_LEDlastTime = currentMillis;   
+        lastTime_LED_BLINK = currentMillis;   
 
         // if the LED is off turn it on and vice-versa:
-        if (BLINK_LEDstate == LOW) {
-            BLINK_LEDstate = HIGH;
+        if (state_LED_BLINK == LOW) {
+            state_LED_BLINK = HIGH;
         } else {
-            BLINK_LEDstate = LOW;
+            state_LED_BLINK = LOW;
         }
 
         // set the LED with the ledState of the variable:
-        digitalWrite(BLINK_LEDPin, BLINK_LEDstate);
+        digitalWrite(pin_LED_BLINK, state_LED_BLINK);
     }
 }
