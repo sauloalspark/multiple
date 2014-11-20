@@ -23,16 +23,16 @@
 Adafruit_BMP085 bmp;
 
 // Publish Pressure, Altitude
-char              BMP085info[256];
+char              info_BMP085[256];
 //#ifdef BMP_PUBLISH
-char              BMP085infoS[62];
+char              infoS_BMP085[62];
 //#endif
 
-unsigned long   BMP085interval = 10000;
+//unsigned long   BMP085interval = 10000;
 //unsigned long   BMP085interval = 30000;
-//unsigned long     BMP085interval = 60000;
+unsigned long     interval_BMP085 = 60000;
 //unsigned long     BMP085altDiff  = 101500;
-unsigned long     BMP085lastTime;
+unsigned long     lastTime_BMP085;
 
 
 
@@ -41,7 +41,7 @@ unsigned long     BMP085lastTime;
 //
 
 // Initialize BMP085
-void InitializeBMP085(){
+void Initialize_BMP085(){
 	if (!bmp.begin()) {
 	    RGB.control(true);
 	    RGB.color(255, 255, 255);
@@ -51,25 +51,19 @@ void InitializeBMP085(){
 		
 		while (1) {}
 	}
-	
-	RGB.control(false);
 }
 
-int getBMP085info(String command){
-    //    Spark.publish("neoUpdate", "updating", publishTTL, PRIVATE);
-        
+int getinfo_BMP085(String command){
     float   temp     = bmp.readTemperature();
-    int32_t pressure = bmp.readPressure();
+    float   pressure = bmp.readPressure() / 100.0;
     float   alt      = bmp.readAltitude();
     //float ralt     = bmp.readAltitude(BMP085altDiff);
 
-
-    sprintf(BMP085info , "{\"temperature\": %.5f, \"pressure\": %.5f, \"altitude\": %.5f}", temp, pressure/100.0, alt );
-    //sprintf(BMP085info , "{\"temperature\": %.5f, \"pressure\": %.5f, \"altitude\": %.5f}", bmp.readTemperature(), bmp.readPressure()/100.0, bmp.readAltitude() );
-
-    //#ifdef BMP_PUBLISH
-        sprintf(BMP085infoS, "{\"t\":%.5f,\"p\":%.5f,\"a\":%.5f,\"ra\":%.5f}", temp, pressure/100.0, alt );
-    //#endif
+    sprintf(info_BMP085 , "{\"temperature\": %.5f, \"pressure\": %.5f, \"altitude\": %.5f}", temp, pressure, alt );
+    
+    #ifdef BMP_PUBLISH
+        sprintf(infoS_BMP085, "{\"t\":%.5f,\"p\":%.5f,\"a\":%.5f,\"ra\":%.5f}", temp, pressure, alt );
+    #endif
 
     #ifdef BMP_SERIAL
         Serial.print("Temperature = ");
@@ -94,67 +88,61 @@ int getBMP085info(String command){
         //Serial.print(ralt);
         //Serial.println(" meters");
     #endif
-    //Spark.publish("neoUpdate", "updated" , publishTTL, PRIVATE);
-
+    
     return 1;
 }
 
 #ifdef BMP_PUBLISH
-void publishBMP085info(){
-    if ( (millis()-BMP085lastTime) < BMP085interval ) {
+void publishinfo_BMP085(){
+    if ( (millis()-lastTime_BMP085) < interval_BMP085 ) {
         return;
     }
     
-    //Spark.publish("neoUpdate"   , "publish update", publishTTL, PRIVATE);
+    getinfo_BMP085("");
     
-    getBMP085info("");
+    Spark.publish("BMP085infoEv", infoS_BMP085, publishTTL, PRIVATE);
     
-    //Spark.publish("neoUpdate"   , "publish updated", publishTTL, PRIVATE);
-    
-    Spark.publish("BMP085infoEv", BMP085infoS, publishTTL, PRIVATE);
-    //Spark.publish("BMP085infoEv", "pubishing actual results", publishTTL, PRIVATE);
-    
-    BMP085lastTime = millis();
+    lastTime_BMP085 = millis();
 }
 #endif
 
-void updateBMP085info(){
-    if ( (millis()-BMP085lastTime) < BMP085interval ) {
+void updateinfo_BMP085(){
+    if ( (millis()-lastTime_BMP085) < interval_BMP085 ) {
         return;
     }
     
-    //Spark.publish("neoUpdate", "function", publishTTL, PRIVATE);
+    getinfo_BMP085("");
     
-    getBMP085info("");
-    
-    BMP085lastTime = millis();
+    lastTime_BMP085 = millis();
 }
 
 void InitializeApplication_BMP085() {
+    Initialize_BMP085();
+    
     #ifdef BMP_SERIAL
         Serial.begin(9600);
     #endif
     
     #ifdef BMP_VARIABLE
-        Spark.variable( "BMP085"   , &BMP085info   , STRING );
+        Spark.variable( "BMP085"   , &info_BMP085   , STRING );
     #endif
     
     #ifdef BMP_FUNCTION
-        Spark.function( "getBMP085",  getBMP085info         );
+        Spark.function( "getBMP085",  getinfo_BMP085         );
     #endif
     
-    getBMP085info("");
+    getinfo_BMP085("");
     
-    BMP085lastTime = millis();
+    lastTime_BMP085 = millis();
 }
 
-void runBMP085() {
+void run_BMP085() {
     #ifdef BMP_PUBLISH
-        publishBMP085info();
+        publishinfo_BMP085();
     #else
 
         #ifdef BMP_VARIABLE
-            updateBMP085info();
+            updateinfo_BMP085();
         #endif
 
     #endif
