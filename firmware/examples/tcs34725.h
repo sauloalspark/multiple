@@ -9,16 +9,16 @@
 //#define TCS34725_PUBLISH
 #define TCS34725_VARIABLE
 
-char              TCS34725info[256];
+char              info_TCS34725[256];
 #ifdef TCS34725_PUBLISH
-char              TCS34725infoS[62];
+char              infoS_TCS34725[62];
 #endif
 //unsigned long   BMP085interval = 30000;
-unsigned long     TCS34725interval = 60000;
+unsigned long     interval_TCS34725 = 60000;
 //unsigned long     BMP085altDiff  = 101500;
-unsigned long     TCS34725lastTime;
+unsigned long     lastTime_TCS34725;
 
-boolean TCS34725_commonAnode = false;
+boolean commonAnode_TCS34725 = false;
 Adafruit_TCS34725  tcs = Adafruit_TCS34725 (TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
 
 
@@ -27,7 +27,7 @@ Adafruit_TCS34725  tcs = Adafruit_TCS34725 (TCS34725_INTEGRATIONTIME_50MS, TCS34
 //
 
 // Initialize TCS34725
-void InitializeTCS34725(){
+void Initialize_TCS34725(){
 	if (!tcs.begin()) {
 	    RGB.control(true);
 	    RGB.color(255, 0, 0);
@@ -37,13 +37,9 @@ void InitializeTCS34725(){
 		
 		while (1) {}
 	}
-	
-	RGB.control(false);
 }
 
-int getTCS34725info(String command){
-    //    Spark.publish("neoUpdate", "updating", publishTTL, PRIVATE);
-
+int getinfo_TCS34725(String command){
     tcs.setInterrupt(false);      // turn on LED
     
     delay(60);  // takes 50ms to read 
@@ -62,76 +58,71 @@ int getTCS34725info(String command){
     b = blue;  b /= sum;
     r *= 256; g *= 256; b *= 256;
     
-    sprintf(TCS34725info , "{\"red\": %d, \"green\": %d, \"blue\": %d, \"clear\": %d}", (int)r, (int)g, (int)b, clear);
+    sprintf(info_TCS34725 , "{\"red\": %d, \"green\": %d, \"blue\": %d, \"clear\": %d}", (int)r, (int)g, (int)b, clear);
 
     #ifdef TCS34725_PUBLISH
-        sprintf(TCS34725infoS, "{\"r\": %d, \"g\": %d, \"b\": %d, \"c\": %d}", (int)r, (int)g, (int)b, clear);
+        sprintf(infoS_TCS34725, "{\"r\": %d, \"g\": %d, \"b\": %d, \"c\": %d}", (int)r, (int)g, (int)b, clear);
     #endif
 
         
     #ifdef TCS34725_SERIAL
-        Serial.println(TCS34725info);
+        Serial.println(info_TCS34725);
     #endif
 
     return 1;
 }
 
 #ifdef TCS34725_PUBLISH
-void publishTCS34725info(){
-    if ( (millis()-TCS34725lastTime) < TCS34725interval ) {
+void publishinfo_TCS34725(){
+    if ( (millis()-lastTime_TCS34725) < interval_TCS34725 ) {
         return;
     }
     
-    //Spark.publish("neoUpdate"   , "publish update", publishTTL, PRIVATE);
+    getinfo_TCS34725("");
     
-    getTCS34725info("");
-    
-    //Spark.publish("neoUpdate"   , "publish updated", publishTTL, PRIVATE);
-    
-    Spark.publish("TCS34725infoEv", TCS34725infoS, publishTTL, PRIVATE);
-    //Spark.publish("BMP085infoEv", "pubishing actual results", publishTTL, PRIVATE);
-    
-    TCS34725lastTime = millis();
+    Spark.publish("TCS34725infoEv", infoS_TCS34725, publishTTL, PRIVATE);
+
+    lastTime_TCS34725 = millis();
 }
 #endif
 
-void updateTCS34725info(){
-    if ( (millis()-TCS34725lastTime) < TCS34725interval ) {
+void updateinfo_TCS34725(){
+    if ( (millis()-lastTime_TCS34725) < interval_TCS34725 ) {
         return;
     }
     
-    //Spark.publish("neoUpdate", "function", publishTTL, PRIVATE);
+    getinfo_TCS34725("");
     
-    getTCS34725info("");
-    
-    TCS34725lastTime = millis();
+    lastTime_TCS34725 = millis();
 }
 
 void InitializeApplication_TCS34725() {
+    Initialize_TCS34725();
+    
     #ifdef TCS34725_SERIAL
         Serial.begin(9600);
     #endif
     
     #ifdef TCS34725_VARIABLE
-        Spark.variable( "TCS34725"   , &TCS34725info   , STRING );
+        Spark.variable( "TCS34725"   , &info_TCS34725   , STRING );
     #endif
     
     #ifdef TCS34725_FUNCTION
-        Spark.function( "getTCS34725",  getTCS34725info         );
+        Spark.function( "getTCS34725",  getinfo_TCS34725         );
     #endif
     
-    getTCS34725info("");
+    getinfo_TCS34725("");
     
-    TCS34725lastTime = millis();
+    lastTime_TCS34725 = millis();
 }
 
-void runTCS34725() {
+void run_TCS34725() {
     #ifdef TCS34725_PUBLISH
-        publishTCS34725info();
+        publishinfo_TCS34725();
     #else
 
         #ifdef BMP_TCS34725
-            updateTCS34725info();
+            updateinfo_TCS34725();
         #endif
 
     #endif
