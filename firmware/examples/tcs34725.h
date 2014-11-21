@@ -10,9 +10,7 @@
 #define TCS34725_VARIABLE
 
 char              info_TCS34725[256];
-#ifdef TCS34725_PUBLISH
 char              infoS_TCS34725[62];
-#endif
 //unsigned long   BMP085interval = 30000;
 unsigned long     interval_TCS34725 = 60000;
 //unsigned long     BMP085altDiff  = 101500;
@@ -58,11 +56,9 @@ int getinfo_TCS34725(String command){
     b = blue;  b /= sum;
     r *= 256; g *= 256; b *= 256;
     
-    sprintf(info_TCS34725 , "{\"red\": %d, \"green\": %d, \"blue\": %d, \"clear\": %d}", (int)r, (int)g, (int)b, clear);
-
-    #ifdef TCS34725_PUBLISH
-        sprintf(infoS_TCS34725, "{\"r\": %d, \"g\": %d, \"b\": %d, \"c\": %d}", (int)r, (int)g, (int)b, clear);
-    #endif
+    //sprintf(info_TCS34725 , "{\"red\": %d, \"green\": %d, \"blue\": %d, \"clear\": %d}", (int)r, (int)g, (int)b, clear);
+    sprintf(info_TCS34725 , "{\"r\":%d,\"g\":%d,\"b\":%d,\"c\":%d}", (int)r, (int)g, (int)b, clear);
+    sprintf(infoS_TCS34725, "{\"r\":%d,\"g\":%d,\"b\":%d,\"c\":%d}", (int)r, (int)g, (int)b, clear);
 
         
     #ifdef TCS34725_SERIAL
