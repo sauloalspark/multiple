@@ -13,9 +13,7 @@
 
 
 char              info_ADJDS311[256];
-#ifdef ADJDS311_PUBLISH
 char              infoS_ADJDS311[62];
-#endif
 //unsigned long   BMP085interval = 30000;
 unsigned long     interval_ADJDS311 = 60000;
 //unsigned long     BMP085altDiff  = 101500;
@@ -64,12 +62,10 @@ int getinfo_ADJDS311(String command){
     int blue  = map(color.blue , 0, 1024, 0, 255);
     int clear = map(color.clear, 0, 1024, 0, 255);
  
-    sprintf(info_ADJDS311 , "{\"red\": %d, \"green\": %d, \"blue\": %d, \"clear\": %d}", red, green, blue, clear);
-
-    #ifdef ADJDS311_PUBLISH
-        sprintf(infoS_ADJDS311, "{\"r\": %d, \"g\": %d, \"b\": %d, \"c\": %d}", red, green, blue, clear);
-    #endif
-
+    //sprintf(info_ADJDS311 , "{\"red\": %d, \"green\": %d, \"blue\": %d, \"clear\": %d}", red, green, blue, clear);
+    sprintf(info_ADJDS311 , "{\"r\":%d,\"g\":%d,\"b\":%d,\"c\":%d}", red, green, blue, clear);
+    sprintf(infoS_ADJDS311, "{\"r\":%d,\"g\":%d,\"b\":%d,\"c\":%d}", red, green, blue, clear);
+    
     #ifdef ADJDS311_SERIAL
         Serial.println(info_ADJDS311);
     #endif
