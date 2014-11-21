@@ -24,9 +24,7 @@ Adafruit_BMP085 bmp;
 
 // Publish Pressure, Altitude
 char              info_BMP085[256];
-//#ifdef BMP_PUBLISH
 char              infoS_BMP085[62];
-//#endif
 
 //unsigned long   BMP085interval = 10000;
 //unsigned long   BMP085interval = 30000;
@@ -59,11 +57,9 @@ int getinfo_BMP085(String command){
     float   alt      = bmp.readAltitude();
     //float ralt     = bmp.readAltitude(BMP085altDiff);
 
-    sprintf(info_BMP085 , "{\"temperature\": %.5f, \"pressure\": %.5f, \"altitude\": %.5f}", temp, pressure, alt );
-    
-    #ifdef BMP_PUBLISH
-        sprintf(infoS_BMP085, "{\"t\":%.5f,\"p\":%.5f,\"a\":%.5f,\"ra\":%.5f}", temp, pressure, alt );
-    #endif
+    //sprintf(info_BMP085 , "{\"temperature\": %.5f, \"pressure\": %.5f, \"altitude\": %.5f}", temp, pressure, alt );
+    sprintf(info_BMP085 , "{\"t\":%.5f,\"p\":%.5f,\"a\":%.5f}", temp, pressure, alt );
+    sprintf(infoS_BMP085, "{\"t\":%.5f,\"p\":%.5f,\"a\":%.5f}", temp, pressure, alt );
 
     #ifdef BMP_SERIAL
         Serial.print("Temperature = ");
