@@ -11,9 +11,7 @@
 #define TMP006_VARIABLE
 
 char              info_TMP006[256];
-#ifdef TMP006_PUBLISH
 char              infoS_TMP006[62];
-#endif
 //unsigned long   BMP085interval = 30000;
 unsigned long     interval_TMP006 = 60000;
 //unsigned long     BMP085altDiff  = 101500;
@@ -48,11 +46,9 @@ int getinfo_TMP006(String command){
     double sensor_temp = tmp006.readDieTempC();
 
     
-    sprintf(info_TMP006 , "{\"Object Temperature\": %.5f, \"Sensor Temperature\": %.5f}", object_temp, sensor_temp);
-
-    #ifdef TMP006_PUBLISH
-        sprintf(infoS_TMP006, "{\"temp_o\": %.5f, \"temp_s\": %.5f}", object_temp, sensor_temp);
-    #endif
+    //sprintf(info_TMP006 , "{\"Object Temperature\": %.5f, \"Sensor Temperature\": %.5f}", object_temp, sensor_temp);
+    sprintf(info_TMP006 , "{\"temp_o\":%.5f,\"temp_s\":%.5f}", object_temp, sensor_temp);
+    sprintf(infoS_TMP006, "{\"temp_o\":%.5f,\"temp_s\":%.5f}", object_temp, sensor_temp);
 
     #ifdef TMP006_SERIAL
         Serial.print("Object Temperature: ");
